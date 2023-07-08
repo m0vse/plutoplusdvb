@@ -89,7 +89,7 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
 
 4. Build the code:
    ```
-   cd plutosdr-fw
+   cd ..\plutosdr-fw
    make
    ```
 
