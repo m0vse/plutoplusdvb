@@ -6,6 +6,4 @@ cd ../linux
 git apply ../../patches/linux.diff --verbose
 cd ../u-boot-xlnx
 git apply ../../patches/u-boot-xlnx.diff --verbose
-cd ../buildroot
-git apply ../../patches/buildroot.diff --verbose
 cd ../..
