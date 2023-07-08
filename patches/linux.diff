@@ -49,7 +49,7 @@ index 9c9a0c9dbf9c..47ba8e2f9133 100644
  &adc0_ad9364 {
  	/* This property is controlled by u-boot environment. */
  	adi,2rx-2tx-mode-enable;
-@@ -70,6 +30,11 @@
+@@ -70,6 +30,11 @@ &cf_ad9364_dac_core_0 {
  / {
  	model = "Analog Devices PlutoSDR Rev.C (Z7010/AD9363)";
  
@@ -61,7 +61,7 @@ index 9c9a0c9dbf9c..47ba8e2f9133 100644
  	leds {
  		compatible = "gpio-leds";
  		led0 {
-@@ -92,3 +57,18 @@
+@@ -92,3 +57,18 @@ button {
  		};
  	};
  };
@@ -84,7 +84,7 @@ diff --git a/arch/arm/boot/dts/zynq-pluto-sdr.dtsi b/arch/arm/boot/dts/zynq-plut
 index 08c5a42204f3..8385a42beb41 100644
 --- a/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
 +++ b/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
-@@ -32,8 +32,16 @@
+@@ -32,8 +32,16 @@ ad9364_clkin: clock@0 {
  
  };
  
@@ -102,7 +102,7 @@ index 08c5a42204f3..8385a42beb41 100644
  };
  
  &watchdog0 {
-@@ -42,9 +50,12 @@
+@@ -42,9 +50,12 @@ &watchdog0 {
  };
  
  &usb0 {
@@ -116,7 +116,7 @@ index 08c5a42204f3..8385a42beb41 100644
  };
  
  &qspi {
-@@ -90,6 +101,18 @@
+@@ -90,6 +101,18 @@ channel@0 {
  	};
  };
  
@@ -135,7 +135,7 @@ index 08c5a42204f3..8385a42beb41 100644
  / {
  	fpga_axi: fpga-axi@0 {
  		compatible = "simple-bus";
-@@ -179,6 +202,148 @@
+@@ -179,6 +202,148 @@ mwipcore@43c00000 {
  	};
  };
  
