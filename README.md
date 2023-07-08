@@ -94,6 +94,15 @@ Make sure that you install the correct version of Vivado, the current supported 
 
 In case you hit the error, please search the internet on PlutoSDR firmware build. It is identical.
 
+To update your repo to the latest version, you must first revert the patches, run the update and then apply the latest patches as follows:
+```
+scripts/revert.sh
+git pull
+git submodule update --recursive
+scripts/apply.sh
+```
+
+
 ## Jumpers and Pinouts
 
 There is description on PCB on the jumpers.
