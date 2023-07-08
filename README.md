@@ -1,5 +1,5 @@
 # Pluto+DVB
-The repo maintain the firmware of Pluto+DVB 
+This is a fork of the firmware of Pluto+ combined with datvplutofrm from F5UII
 
 This is a software-defined radio platform that supports DVB transmission, it also supports Gigabit Ethernet and Micro SD card. 
 
