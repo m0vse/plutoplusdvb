@@ -63,7 +63,7 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
 
 First you must install all prerequisites from https://wiki.analog.com/university/tools/pluto/building_the_image
 
-Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB!
+Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB and will take a LONG time to install!
 
 1. Clone this repo
 
@@ -76,13 +76,12 @@ Make sure that you install the correct version of Vivado, the current supported 
 3. Apply the diff to each subfolder
    ```
    scripts/patch.sh
-   
    ```
+   If any patches fail to apply, please let me know as compiling will likely fail
 
-5. Add the datv support code:
+5. Configure paths and add DVB support (assumes Vivado is installed in default location of /tools/Vivado):
    ```
-   cd datvplutofrm
-   source ./sourceme.ggm
+   source datvplutofrm/sourceme.ggm
    ```
 
 4. Build the code:
