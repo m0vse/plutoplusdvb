@@ -67,38 +67,42 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
 
 ## How to build firmware manually
 
-First you must install all prerequisites from https://wiki.analog.com/university/tools/pluto/building_the_image
 
-Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB and will take a LONG time to install!
+1. Install pre-requisite components
+   ```
+   sudo apt-get install git build-essential ccache device-tree-compiler dfu-util fakeroot help2man libncurses5 libncurses5-dev libtinfo5 libtinfo-dev libssl-dev mtools rsync u-boot-tools bc python cpio zip unzip file wget flex bison
 
-1. Clone this repo
+   ```
+2. Install Vivado 2021.2 from https://www.xilinx.com/support/download.html. Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB and will take a LONG time to install!
 
-2. Download the source code:
+3. Clone this repo
+
+4. Download the source code:
    ```
    cd plutoplusdvb
    git submodule update --init --recursive
    ```
 
-3. Run the patch.sh script to apply diffs to each submodule
+5. Run the patch.sh script to apply diffs to each submodule
    ```
    scripts/patch.sh
    ```
    If any patches fail to apply, please let me know as compiling will likely fail
 
-5. Configure paths and add DVB support (assumes Vivado is installed in default location of /tools/Vivado):
+6. Configure paths and add DVB support (assumes Vivado is installed in default location of /tools/Vivado):
    ```
    source datvplutofrm/sourceme.ggm
    ```
 
-4. Build the code:
+7. Build the code:
    ```
    cd ..\plutosdr-fw
    make
    ```
 
-5. Once complete, firmware is located in build directory
+8. Once complete, firmware is located in build directory
 
-In case you hit the error, please search the internet on PlutoSDR firmware build. It is identical.
+In the event of any errors, please search the internet on PlutoSDR firmware build. It is identical.
 
 To update your repo to the latest version, you must first revert the patches, run the update and then apply the latest patches as follows:
 ```
