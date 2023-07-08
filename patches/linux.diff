@@ -1,5 +1,5 @@
 diff --git a/arch/arm/boot/dts/zynq-pluto-sdr-revc.dts b/arch/arm/boot/dts/zynq-pluto-sdr-revc.dts
-index 7aff4e197d0f..5313336a30a4 100644
+index 9c9a0c9dbf9c..47ba8e2f9133 100644
 --- a/arch/arm/boot/dts/zynq-pluto-sdr-revc.dts
 +++ b/arch/arm/boot/dts/zynq-pluto-sdr-revc.dts
 @@ -17,46 +17,6 @@
@@ -22,7 +22,7 @@ index 7aff4e197d0f..5313336a30a4 100644
 -};
 -
 -&amba {
--	axi_spi: axi_quad_spi@7C430000 {
+-	axi_spi: spi@7C430000 {
 -		#address-cells = <1>;
 -		#size-cells = <0>;
 -		bits-per-word = <8>;
@@ -76,16 +76,15 @@ index 7aff4e197d0f..5313336a30a4 100644
 +&usb0 {
 +	status = "okay";
 +	dr_mode = "otg";
-+	usb-phy = <&usb_phy0>;
-+    pinctrl-names = "default";
-+    pinctrl-0 = <&pinctrl_usb0_default>;
++	//usb-phy = <&usb_phy0>;
++        pinctrl-names = "default";
++        pinctrl-0 = <&pinctrl_usb0_default>;
 +};
-\ No newline at end of file
 diff --git a/arch/arm/boot/dts/zynq-pluto-sdr.dtsi b/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
-index e936f48dbd73..bad6c46056a5 100644
+index 08c5a42204f3..8385a42beb41 100644
 --- a/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
 +++ b/arch/arm/boot/dts/zynq-pluto-sdr.dtsi
-@@ -40,8 +40,16 @@
+@@ -32,8 +32,16 @@
  
  };
  
@@ -103,7 +102,7 @@ index e936f48dbd73..bad6c46056a5 100644
  };
  
  &watchdog0 {
-@@ -50,12 +58,29 @@
+@@ -42,9 +50,12 @@
  };
  
  &usb0 {
@@ -111,49 +110,32 @@ index e936f48dbd73..bad6c46056a5 100644
 +	xlnx,phy-reset-gpio = <&gpio0 46 0>;
  	dr_mode = "otg";
  	status = "okay";
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_usb0_default>;
- 	usb-phy = <&usb_phy0>;
++        pinctrl-names = "default";
++        pinctrl-0 = <&pinctrl_usb0_default>;
++        //usb-phy = <&usb_phy0>;
  };
  
-+&gem0 {
-+	status = "ok";
-+	phy-mode = "rgmii-id";
-+	phy-handle = <&ethernet_phy>;
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&pinctrl_gem0_default>;
-+
-+
-+	ethernet_phy: ethernet-phy@1 {
-+		reg = <1>;
-+		device_type = "ethernet-phy";
-+	};
-+};
-+
-+
  &qspi {
- 	status = "okay";
- 	is-dual = <0>;
-@@ -98,6 +123,18 @@
+@@ -90,6 +101,18 @@
  	};
  };
  
-+
 +&gem0 {
-+	status = "disabled";
-+	phy-mode = "rgmii-id";
-+	phy-handle = <&ethernet_phy>;
-+
-+	ethernet_phy: ethernet-phy@1 {
-+		reg = <1>;
-+		device_type = "ethernet-phy";
-+	};
++        status = "ok";
++        phy-mode = "rgmii-id";
++        phy-handle = <&ethernet_phy>;
++        pinctrl-names = "default";
++        pinctrl-0 = <&pinctrl_gem0_default>;
++        ethernet_phy: ethernet-phy@1 {
++               reg = <1>;
++               device_type = "ethernet-phy";
++        };
 +};
 +
  / {
  	fpga_axi: fpga-axi@0 {
  		compatible = "simple-bus";
-@@ -187,6 +224,148 @@
+@@ -179,6 +202,148 @@
  	};
  };
  
@@ -303,10 +285,10 @@ index e936f48dbd73..bad6c46056a5 100644
  	status = "okay";
  
 diff --git a/arch/arm/configs/zynq_pluto_defconfig b/arch/arm/configs/zynq_pluto_defconfig
-index ca72dd96a29d..01ed0ddd753d 100644
+index 1efe8ab24437..89365b48bb1f 100644
 --- a/arch/arm/configs/zynq_pluto_defconfig
 +++ b/arch/arm/configs/zynq_pluto_defconfig
-@@ -270,3 +270,15 @@ CONFIG_RCU_CPU_STALL_TIMEOUT=60
+@@ -268,3 +268,15 @@ CONFIG_RCU_CPU_STALL_TIMEOUT=60
  CONFIG_DEBUG_LL=y
  CONFIG_DEBUG_ZYNQ_UART1=y
  CONFIG_EARLY_PRINTK=y

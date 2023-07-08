@@ -1,5 +1,10 @@
-# Pluto+
-The repo maintain the firmware of Pluto+. Pluto+ is a software-defined radio platform that supports 2TX 2RX, supports Gigabit Ethernet and Micro SD card. The design inherited from the well-known ADI ADALM-PLUTO with several improvements.
+# Pluto+DVB
+The repo maintain the firmware of Pluto+DVB 
+
+This is a software-defined radio platform that supports DVB transmission, it also supports Gigabit Ethernet and Micro SD card. 
+
+The design inherited from the well-known ADI ADALM-PLUTO with several improvements.
+
 
 [TOC]
 
