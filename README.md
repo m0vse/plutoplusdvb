@@ -77,10 +77,23 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
    
    cd u-boot-xlnx
    git apply ../../u-boot-xlnx.diff
-   cd ..
+   cd ..\..
    
    ```
-4. Build the code via 'make' in plutosdr-fw folder
+
+5. Add the datv support code:
+   ```
+   cd datvplutofrm
+   source ./sourceme.ggm
+   ```
+
+4. Build the code:
+   ```
+   cd plutosdr-fw
+   make
+   ```
+
+5. Once complete, firmware is located in build directory
 
 In case you hit the error, please search the internet on PlutoSDR firmware build. It is identical.
 
