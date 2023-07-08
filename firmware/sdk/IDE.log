@@ -1,0 +1,13 @@
+20:01:19 INFO  : Registering command handlers for Vitis TCF services
+20:01:19 INFO  : Platform repository initialization has completed.
+20:01:20 INFO  : Successfully done query RDI_DATADIR 
+20:01:20 INFO  : plnx-install-location is set to ''
+20:01:33 INFO  : Platform 'system_top' is added to custom repositories.
+20:01:51 INFO  : Result from executing command 'reportApp': {fsblpath=fsbl is not available in the platform., Platform Path=/home/phil/plutoplusdvb/plutosdr-fw/build/sdk/system_top/export/system_top/system_top.xpfm, Domain=standalone_domain, platform=system_top}
+20:01:51 INFO  : Result from executing command 'reportPlatform': {system_top={standalone_domain={Os=standalone, DomainName=standalone_domain, CpuType=cortex-a9, CpuInstance=ps7_cortexa9_0}}}
+20:01:51 INFO  : Result from executing command 'getDefinitions': {assembler-flags={description=Miscellaneous flags for assembler , props=add set}, build-config={values=Debug,Release, description=Get/set build configuration, props=set}, library-search-path={description=Search path for the libraries added, props=add remove}, compiler-misc={description=Compiler miscellaneous flags, props=add set}, define-compiler-symbols={description=Define symbols. Ex. MYSYMBOL, props=add remove}, compiler-optimization={values=None (-O0), Optimize (-O1), Optimize more (-O2), Optimize most (-O3), Optimize for size (-Os), description=Optimization level, props=set}, libraries={description=Libraries to be added while linking, props=add remove}, undef-compiler-symbols={description=Undefine symbols. Ex. MYSYMBOL, props=add remove}, linker-misc={description=Linker miscellaneous flags, props=add set}, include-path={description=Include path for header files, props=add remove}, linker-script={description=Linker script for linking the program sections, props=set}}
+20:01:51 INFO  : Result from executing command 'getProjects': fsbl;fsbl_system;system_top
+20:01:51 INFO  : Result from executing command 'set': null
+20:01:51 INFO  : Build configuration of 'fsbl_system' is updated to 'Release'
+20:01:51 INFO  : Build configuration of system project is automatically updated to 'Release'.
+20:02:07 INFO  : Checking for BSP changes to sync application flags for project 'fsbl'...
