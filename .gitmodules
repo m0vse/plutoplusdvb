@@ -3,6 +3,6 @@
 	url = https://github.com/analogdevicesinc/plutosdr-fw.git
 [submodule "datvplutofrm"]
 	path = datvplutofrm
-	url = https://github.com/F5OEO/datvplutofrm.git
+	url = https://github.com/m0vse/datvplutofrm.git
 	branch = topic-f5uii
 
