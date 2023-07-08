@@ -5,6 +5,12 @@ This is a software-defined radio platform that supports DVB transmission, it als
 
 The design inherited from the well-known ADI ADALM-PLUTO with several improvements.
 
+# Modifications by M0VSE
+Applied patches to Pluto firmware v0.37
+Various other path updates and documentation
+
+** PLEASE NOTE **
+This software is experimental and I accept no liability for any damage that may occur to your Plutoplus by using it
 
 [TOC]
 
@@ -55,8 +61,8 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
 4. Run DFU utility with the following command:
 
    ```
-   dfu-tool -a 0 -write boot.dfu
-   dfu-tool -a 1 -write pluto.dfu
+   dfu-util -a boot.dfu -D ./boot.dfu
+   dfu-util -a firmware.dfu -D ./pluto.dfu
    ```
 
 ## How to build firmware manually
@@ -73,7 +79,7 @@ Make sure that you install the correct version of Vivado, the current supported 
    git submodule update --init --recursive
    ```
 
-3. Apply the diff to each subfolder
+3. Run the patch.sh script to apply diffs to each submodule
    ```
    scripts/patch.sh
    ```
