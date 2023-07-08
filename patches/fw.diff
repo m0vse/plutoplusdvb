@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index b06bc25..4f62aaf 100644
+index b06bc25..3369704 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -62,7 +62,7 @@ all:
@@ -15,14 +15,11 @@ index b06bc25..4f62aaf 100644
  	@echo device-fw $(VERSION)> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS
  	@$(foreach dir,$(VSUBDIRS),echo $(dir) $(shell cd $(dir) && git describe --abbrev=4 --dirty --always --tags) >> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS;)
  	make -C buildroot ARCH=arm zynq_$(TARGET)_defconfig
--	make -C buildroot legal-info
--	scripts/legal_info_html.sh "$(COMPLETE_NAME)" "$(CURDIR)/buildroot/board/$(TARGET)/VERSIONS"
--	cp build/LICENSE.html buildroot/board/$(TARGET)/msd/LICENSE.html
--	make -C buildroot TOOLCHAIN_EXTERNAL_INSTALL_DIR=$(TOOLCHAIN_PATH) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) BUSYBOX_CONFIG_FILE=$(CURDIR)/buildroot/board/$(TARGET)/busybox-1.25.0.config all
 +
-+### 	make -C buildroot legal-info
-+### 	scripts/legal_info_html.sh "$(COMPLETE_NAME)" "$(CURDIR)/buildroot/board/$(TARGET)/VERSIONS"
-+### 	cp build/LICENSE.html buildroot/board/$(TARGET)/msd/LICENSE.html
+ 	make -C buildroot legal-info
+ 	scripts/legal_info_html.sh "$(COMPLETE_NAME)" "$(CURDIR)/buildroot/board/$(TARGET)/VERSIONS"
+ 	cp build/LICENSE.html buildroot/board/$(TARGET)/msd/LICENSE.html
+-	make -C buildroot TOOLCHAIN_EXTERNAL_INSTALL_DIR=$(TOOLCHAIN_PATH) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) BUSYBOX_CONFIG_FILE=$(CURDIR)/buildroot/board/$(TARGET)/busybox-1.25.0.config all
 +	make -C buildroot TOOLCHAIN_EXTERNAL_INSTALL_DIR=$(TOOLCHAIN_PATH) ARCH=arm CROSS_COMPILE=$(CROSS_COMPILE) BUSYBOX_CONFIG_FILE=$(BR2_EXTERNAL)/board/$(TARGET)/busybox-1.25.0.config all
  
  .PHONY: buildroot/output/images/rootfs.cpio.gz
