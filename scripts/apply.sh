@@ -1,11 +1,11 @@
 cd plutosdr-fw
-git apply ../patches/fw.diff
+git apply ../patches/fw.diff --verbose
 cd hdl
-git apply ../../patches/hdl.diff
+git apply ../../patches/hdl.diff --verbose
 cd ../linux
-git apply ../../patches/linux.diff
+git apply ../../patches/linux.diff --verbose
 cd ../u-boot-xlnx
-git apply ../../patches/u-boot-xlnx.diff
+git apply ../../patches/u-boot-xlnx.diff --verbose
 cd ../buildroot
-git apply ../../patches/buildroot.diff
+git apply ../../patches/buildroot.diff --verbose
 cd ../..

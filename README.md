@@ -60,24 +60,22 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
    ```
 
 ## How to build firmware manually
+
+First you must install all prerequisites from https://wiki.analog.com/university/tools/pluto/building_the_image
+
+Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB!
+
 1. Clone this repo
-2. Download the source code via 'git submodule update --init'
+
+2. Download the source code:
+   ```
+   cd plutoplusdvb
+   git submodule update --init --recursive
+   ```
+
 3. Apply the diff to each subfolder
    ```
-   cd plutosdr-fw
-   git apply ../patches/fw.diff
-   
-   cd hdl
-   git apply ../../hdl.diff
-   cd ..
-   
-   cd linux
-   git apply ../../linux.diff
-   cd ..
-   
-   cd u-boot-xlnx
-   git apply ../../u-boot-xlnx.diff
-   cd ..\..
+   scripts/patch.sh
    
    ```
 
