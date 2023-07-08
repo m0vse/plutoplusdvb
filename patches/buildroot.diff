@@ -18,10 +18,10 @@ index 88728cc9f2..78815511b9 100644
  # CONFIG_FEATURE_NETSTAT_WIDE is not set
  # CONFIG_FEATURE_NETSTAT_PRG is not set
 diff --git a/board/pluto/motd b/board/pluto/motd
-index a3b3f6f664..0d8a8453fb 100644
+index a3b3f6f664..95f13980ff 100644
 --- a/board/pluto/motd
 +++ b/board/pluto/motd
-@@ -1,10 +1,9 @@
+@@ -1,10 +1,10 @@
  Welcome to:
 -______ _       _        _________________
 -| ___ \ |     | |      /  ___|  _  \ ___ \
@@ -29,12 +29,14 @@ index a3b3f6f664..0d8a8453fb 100644
 -|  __/| | | | | __/ _ \ `--. \ | | |    /
 -| |   | | |_| | || (_) /\__/ / |/ /| |\ \
 -\_|   |_|\__,_|\__\___/\____/|___/ \_| \_|
-+ ____  _       _
-+|  _ \| |_   _| |_ ___    _    
-+| |_) | | | | | __/ _ \ _| |_  
-+|  __/| | |_| | || (_) |_   _|
-+|_|   |_|\__,_|\__\___/  |_|	DVB
- 
+-
++  _____   _         _                _____ __      __ ____  
++ |  __ \ | |       | |          _   |  __ \\ \    / /|  _ \ 
++ | |__) || | _   _ | |_  ___  _| |_ | |  | |\ \  / / | |_) |
++ |  ___/ | || | | || __|/ _ \|_   _|| |  | | \ \/ /  |  _ < 
++ | |     | || |_| || |_| (_) | |_|  | |__| |  \  /   | |_) |
++ |_|     |_| \__,_| \__|\___/       |_____/    \/    |____/ 
++                                                            
  #BUILD#
 -https://wiki.analog.com/university/tools/pluto
 +https://github.com/plutoplus/plutoplus
