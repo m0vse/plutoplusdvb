@@ -1,20 +1,13 @@
 diff --git a/Makefile b/Makefile
-index b06bc25..3369704 100644
+index b06bc25..d9ef562 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -62,7 +62,7 @@ all:
- 	@echo "Invalid `TARGET variable ; valid values are: pluto, sidekiqz2" &&
- 	exit 1
- else
--all: clean-build $(TARGETS) zip-all legal-info
-+all: clean-build $(TARGETS) zip-all
- endif
- 
- .NOTPARALLEL: all
-@@ -118,10 +118,11 @@ buildroot/output/images/rootfs.cpio.gz:
+@@ -117,11 +117,12 @@ build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
+ buildroot/output/images/rootfs.cpio.gz:
  	@echo device-fw $(VERSION)> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS
  	@$(foreach dir,$(VSUBDIRS),echo $(dir) $(shell cd $(dir) && git describe --abbrev=4 --dirty --always --tags) >> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS;)
- 	make -C buildroot ARCH=arm zynq_$(TARGET)_defconfig
+-	make -C buildroot ARCH=arm zynq_$(TARGET)_defconfig
++	make -C buildroot ARCH=arm f5oeo_zynq_$(TARGET)_defconfig
 +
  	make -C buildroot legal-info
  	scripts/legal_info_html.sh "$(COMPLETE_NAME)" "$(CURDIR)/buildroot/board/$(TARGET)/VERSIONS"
