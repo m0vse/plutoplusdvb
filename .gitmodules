@@ -1,8 +1,9 @@
 [submodule "plutosdr-fw"]
 	path = plutosdr-fw
 	url = https://github.com/analogdevicesinc/plutosdr-fw.git
+	branch = master
 [submodule "datvplutofrm"]
 	path = datvplutofrm
 	url = https://github.com/m0vse/datvplutofrm.git
-	branch = topic-f5uii
+	branch = master
 
