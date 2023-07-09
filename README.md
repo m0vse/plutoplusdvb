@@ -1,5 +1,3 @@
-** WARNING ** The compiled binaries do NOT currently work, DO NOT use them
-
 # Pluto+DVB
 This is a fork of the firmware of Pluto+ combined with datvplutofrm from F5UII
 
@@ -9,6 +7,8 @@ The design inherited from the well-known ADI ADALM-PLUTO with several improvemen
 
 ** PLEASE NOTE **
 This software is experimental and I accept no liability for any damage that may occur to your Plutoplus by using it
+
+The firmware/ folder contains pre-compiled binaries based on pluto firmware v0.33 and the latest datvplutofrm f5uii-master branch which I have successfully loaded on my Pluto+ (with minimal testing)
 
 [TOC]
 
