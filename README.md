@@ -1,3 +1,5 @@
+** WARNING ** The compiled binaries do NOT currently work, DO NOT use them
+
 # Pluto+DVB
 This is a fork of the firmware of Pluto+ combined with datvplutofrm from F5UII
 
@@ -61,8 +63,8 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
 4. Run DFU utility with the following command:
 
    ```
-   dfu-util -a boot.dfu -D ./boot.dfu
-   dfu-util -a firmware.dfu -D ./pluto.dfu
+   sudo dfu-util -a boot.dfu -D ./boot.dfu
+   sudo dfu-util -a firmware.dfu -D ./pluto.dfu
    ```
 
 ## How to build firmware manually
@@ -70,7 +72,7 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
 
 1. Install pre-requisite components
    ```
-   sudo apt-get install git build-essential ccache device-tree-compiler dfu-util fakeroot help2man libncurses5 libncurses5-dev libtinfo5 libtinfo-dev libssl-dev mtools rsync u-boot-tools bc python cpio zip unzip file wget flex bison
+   sudo apt-get install git build-essential ccache device-tree-compiler dfu-util fakeroot help2man libncurses5 libncurses5-dev libtinfo5 libtinfo-dev libssl-dev mtools rsync u-boot-tools bc python cpio zip unzip file wget flex bison libidn11-dev
 
    ```
 2. Install Vivado 2021.2 from https://www.xilinx.com/support/download.html. Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB and will take a LONG time to install!
