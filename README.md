@@ -41,7 +41,7 @@ Pluto+ has full schematics open sourced. You can find this in sch folder.
 
 ## How to upgrade the firmware
 
-## UDisk Upgrade
+### UDisk Upgrade
 ** PLEASE NOTE **
 This software is experimental and I accept no liability for any damage that may occur to your Plutoplus by using it
 
