@@ -4,5 +4,5 @@
 [submodule "datvplutofrm"]
 	path = datvplutofrm
 	url = https://github.com/m0vse/datvplutofrm.git
-	branch = topic-f5uii
+	branch = pluto-v37
 
