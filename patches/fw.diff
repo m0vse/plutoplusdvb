@@ -1,8 +1,8 @@
 diff --git a/Makefile b/Makefile
-index b06bc25..d9ef562 100644
+index c0bb761..b35de51 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -117,11 +117,12 @@ build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
+@@ -116,11 +116,12 @@ build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
  buildroot/output/images/rootfs.cpio.gz:
  	@echo device-fw $(VERSION)> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS
  	@$(foreach dir,$(VSUBDIRS),echo $(dir) $(shell cd $(dir) && git describe --abbrev=4 --dirty --always --tags) >> $(CURDIR)/buildroot/board/$(TARGET)/VERSIONS;)
