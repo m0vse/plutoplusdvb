@@ -9,11 +9,6 @@ This is a software-defined radio platform that supports DVB transmission, it als
 
 The design inherited from the well-known ADI ADALM-PLUTO with several improvements.
 
-** PLEASE NOTE **
-This software is experimental and I accept no liability for any damage that may occur to your Plutoplus by using it
-
-The firmware/ folder contains pre-compiled binaries based on pluto firmware v0.33 and the latest datvplutofrm f5uii-master branch which I have successfully loaded on my Pluto+ (with minimal testing). It was built using Ubuntu 22.04.
-
 [TOC]
 
 ## Specification
@@ -46,11 +41,13 @@ Pluto+ has full schematics open sourced. You can find this in sch folder.
 
 ## How to upgrade the firmware
 
-### UDisk Upgrade
+## UDisk Upgrade
+** PLEASE NOTE **
+This software is experimental and I accept no liability for any damage that may occur to your Plutoplus by using it
 
-1. You can download the latest firmware from here
-2. Unzip the files
-3. Put *.frm files into the storage disk named "PlutoSDR"
+The firmware/ folder contains pre-compiled binaries based on pluto firmware v0.33 and the latest datvplutofrm f5uii-master branch which I have successfully loaded on my Pluto+ (with minimal testing). It was built using Ubuntu 22.04.
+
+Simply download the pluto.frm file and copy to the PlutoSDR drive on your computer, then eject the drive (the usual Pluto firmware upgrade method). LED1 (green) will flash rapidly for around 10 minutes and then the Plutoplus will reboot into the new firmware.
 
 ### DFU Upgrade
 If you device is not responding anymore, you have to apply DFU procedure to unbrick it.
