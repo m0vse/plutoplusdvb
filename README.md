@@ -8,7 +8,7 @@ This is a software-defined radio platform that supports DVB transmission, it als
 The design inherited from the well-known ADI ADALM-PLUTO with several improvements.
 
 # Modifications by M0VSE
-Applied patches to Pluto firmware v0.37
+Applied patches to Pluto firmware v0.35
 Various other path updates and documentation
 
 ** PLEASE NOTE **
@@ -75,7 +75,7 @@ If you device is not responding anymore, you have to apply DFU procedure to unbr
    sudo apt-get install git build-essential ccache device-tree-compiler dfu-util fakeroot help2man libncurses5 libncurses5-dev libtinfo5 libtinfo-dev libssl-dev mtools rsync u-boot-tools bc python cpio zip unzip file wget flex bison libidn11-dev
 
    ```
-2. Install Vivado 2021.2 from https://www.xilinx.com/support/download.html. Make sure that you install the correct version of Vivado, the current supported version is 2021.2. The installation requires around 250GB and will take a LONG time to install!
+2. Install Vivado 2021.1 from https://www.xilinx.com/support/download.html. Make sure that you install the correct version of Vivado, the current supported version is 2021.1. The installation requires around 250GB and will take a LONG time to install!
 
 3. Clone this repo
 
