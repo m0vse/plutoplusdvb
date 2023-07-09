@@ -6,4 +6,6 @@ cd ../linux
 git checkout .
 cd ../u-boot-xlnx
 git checkout .
+cd ../buildroot
+git checkout .
 cd ../..

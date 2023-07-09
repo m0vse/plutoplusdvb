@@ -1,0 +1,693 @@
+diff --git a/package/fakeroot/0001-hide-dlsym-error.patch b/package/fakeroot/0001-hide-dlsym-error.patch
+deleted file mode 100644
+index 2c61fab248..0000000000
+--- a/package/fakeroot/0001-hide-dlsym-error.patch
++++ /dev/null
+@@ -1,34 +0,0 @@
+-Description: Hide error from dlsym()
+- dlsym(), starting in glibc 2.24 actually reports errors. In our case,
+- we try to get ACL functions which are not in the glibc. This causes
+- failures in test suites, so hide those messages for non-debugging
+- purposes for now. It also makes the build logs annoying to read.
+-Author: Julian Andres Klode <juliank@ubuntu.com>
+-Origin: vendor
+-Bug-Debian: https://bugs.debian.org/830912
+-Forwarded: no
+-Last-Update: 2016-08-12
+-
+-Signed-off-by: Maxime Hadjinlian <maxime.hadjinlian@gmail.com>
+-
+---- a/libfakeroot.c
+-+++ b/libfakeroot.c
+-@@ -256,10 +256,16 @@ void load_library_symbols(void){
+-  /* clear dlerror() just in case dlsym() legitimately returns NULL */
+-     msg = dlerror();
+-     *(next_wrap[i].doit)=dlsym(get_libc(), next_wrap[i].name);
+-+
+-     if ( (msg = dlerror()) != NULL){
+--      fprintf (stderr, "dlsym(%s): %s\n", next_wrap[i].name, msg);
+--/*    abort ();*/
+-+#ifdef LIBFAKEROOT_DEBUGGING
+-+      if (fakeroot_debug) {
+-+        fprintf (stderr, "dlsym(%s): %s\n", next_wrap[i].name, msg);
+-+/*      abort ();*/
+-+      }
+-+#endif
+-     }
+-+
+-   }
+- }
+-
+diff --git a/package/fakeroot/0002-communicate-check-return-status-of-msgrcv.patch b/package/fakeroot/0002-communicate-check-return-status-of-msgrcv.patch
+deleted file mode 100644
+index 4e81b49122..0000000000
+--- a/package/fakeroot/0002-communicate-check-return-status-of-msgrcv.patch
++++ /dev/null
+@@ -1,46 +0,0 @@
+-From a853f21633693f9eefc4949660253a5328d2d2f3 Mon Sep 17 00:00:00 2001
+-From: "Yann E. MORIN" <yann.morin.1998@free.fr>
+-Date: Sun, 13 Aug 2017 23:21:54 +0200
+-Subject: [PATCH] communicate: check return status of msgrcv()
+-
+-msgrcv can return with -1 to indicate an error condition.
+-One such error is to have been interrupted by a signal.
+-
+-Being interrupted by a signal is very rare in this code, except in a
+-very special condition: a highly-parallel (1000 jobs!) mksquashfs on
+-a filesystem with extended attributes, where we see errors like (those
+-are mksquashfs errors):
+-    llistxattr for titi/603/883 failed in read_attrs, because Unknown
+-    error 1716527536
+-
+-See: https://bugs.busybox.net/show_bug.cgi?id=10141
+-
+-In this case, we just have to retry the call to msgrcv().
+-
+-Signed-off-by: "Yann E. MORIN" <yann.morin.1998@free.fr>
+----
+- communicate.c | 5 ++++-
+- 1 file changed, 4 insertions(+), 1 deletion(-)
+-
+-diff --git a/communicate.c b/communicate.c
+-index 293f404..787bb63 100644
+---- a/communicate.c
+-+++ b/communicate.c
+-@@ -553,10 +553,13 @@ void send_get_fakem(struct fake_msg *buf)
+-       l=msgrcv(msg_get,
+-                (struct my_msgbuf*)buf,
+-                sizeof(*buf)-sizeof(buf->mtype),0,0);
+--    while((buf->serial!=serial)||buf->pid!=pid);
+-+    while(((l==-1)&&(errno==EINTR))||(buf->serial!=serial)||buf->pid!=pid);
+- 
+-     semaphore_down();
+- 
+-+    if(l==-1)
+-+      buf->xattr.flags_rc=errno;
+-+
+-     /*
+-     (nah, may be wrong, due to allignment)
+- 
+--- 
+-2.11.0
+-
+diff --git a/package/fakeroot/0003-Select-TCP-when-lack-of-SYSV-IPC.patch b/package/fakeroot/0003-Select-TCP-when-lack-of-SYSV-IPC.patch
+deleted file mode 100644
+index 07b206b68e..0000000000
+--- a/package/fakeroot/0003-Select-TCP-when-lack-of-SYSV-IPC.patch
++++ /dev/null
+@@ -1,77 +0,0 @@
+-From 8e9a7a8c72a9fe407d296ec0ffeb56b2cd271959 Mon Sep 17 00:00:00 2001
+-From: Matt Weber <matthew.weber@rockwellcollins.com>
+-Date: Mon, 16 Sep 2019 22:00:29 -0500
+-Subject: [PATCH] Select TCP when lack of SYSV IPC
+-
+-Update to add a configure test to build and install the TCP IPC version
+-when detecting SYSV IPC MsgQ support isn't available.
+-
+-The issue was initially discovered on Windows Services for Linux
+-(WSL1.0). WSL does have some SysV IPC, but no message Q's, which is
+-required by fakeroot/faked by default.
+-
+-Fixes:
+-https://github.com/Microsoft/WSL/issues/2465
+-
+-Additional bug reports:
+-https://bugs.busybox.net/show_bug.cgi?id=11366
+-
+-Upstream:
+-https://salsa.debian.org/clint/fakeroot/merge_requests/2
+-
+-Signed-off-by: Jean-Francois Doyon <jfdoyon@gmail.com>
+-Signed-off-by: Matthew Weber <matthew.weber@rockwellcollins.com>
+----
+- configure.ac | 36 ++++++++++++++++++++++++++++++++++++
+- 1 file changed, 36 insertions(+)
+-
+-diff --git a/configure.ac b/configure.ac
+-index a9189e6..1650f77 100644
+---- a/configure.ac
+-+++ b/configure.ac
+-@@ -25,6 +25,42 @@ AC_CACHE_CHECK([which IPC method to use],
+- 	       [ac_cv_use_ipc],
+- 	       [ac_cv_use_ipc=sysv])
+- 
+-+if test $ac_cv_use_ipc = "sysv"; then
+-+  AC_MSG_CHECKING([whether SysV IPC message queues are actually working on the host])
+-+
+-+  AC_LANG_PUSH(C)
+-+  AC_TRY_RUN([
+-+#include <stdlib.h>
+-+#include <sys/types.h>
+-+#include <sys/ipc.h>
+-+#include <sys/msg.h>
+-+#include <time.h>
+-+#include <unistd.h>
+-+
+-+int main() {
+-+
+-+  srandom(time(NULL)+getpid()*33151);
+-+  key_t msg_key = random();
+-+  int msg_get = msgget(msg_key, IPC_CREAT|0600);
+-+
+-+  if (msg_get==-1) {
+-+    return 1;
+-+  } else {
+-+    msgctl(msg_get, IPC_RMID, NULL);
+-+    return 0;
+-+  }
+-+
+-+}], [ac_cv_use_ipc=sysv], [ac_cv_use_ipc=tcp])
+-+
+-+  if test $ac_cv_use_ipc = "tcp"; then
+-+    AC_MSG_RESULT([No, using TCP])
+-+  else
+-+    AC_MSG_RESULT([Yes])
+-+  fi
+-+
+-+  AC_LANG_POP(C)
+-+fi
+-+
+- AC_ARG_WITH([dbformat],
+- 	    AS_HELP_STRING([--with-dbformat@<:@=DBFORMAT@:>@],
+- 			   [database format to use: either inode (default) or path]),
+--- 
+-2.17.1
+-
+diff --git a/package/fakeroot/0004-Fix-forwarding-fchownat-fchmod-flags.patch b/package/fakeroot/0004-Fix-forwarding-fchownat-fchmod-flags.patch
+deleted file mode 100644
+index fc74543378..0000000000
+--- a/package/fakeroot/0004-Fix-forwarding-fchownat-fchmod-flags.patch
++++ /dev/null
+@@ -1,28 +0,0 @@
+-Forward supported flags to fstatat, this fixes issues like
+-using an empty path
+-
+-Upstream BR: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=959876
+-
+-Signed-off-by: Norbert Lange <nolange79@gmail.com>
+-
+-diff -burN fakeroot-1.20.2.org/libfakeroot.c fakeroot-1.20.2/libfakeroot.c
+---- fakeroot-1.20.2.org/libfakeroot.c	2014-10-05 17:16:00.000000000 +0200
+-+++ fakeroot-1.20.2/libfakeroot.c	2020-05-10 22:24:18.896625085 +0200
+-@@ -880,7 +880,7 @@
+-   /* If AT_SYMLINK_NOFOLLOW is set in the fchownat call it should
+-      be when we stat it. */
+-   INT_STRUCT_STAT st;
+--  r=INT_NEXT_FSTATAT(dir_fd, path, &st, (flags & AT_SYMLINK_NOFOLLOW));
+-+  r=INT_NEXT_FSTATAT(dir_fd, path, &st, (flags & (AT_SYMLINK_NOFOLLOW | AT_EMPTY_PATH | AT_NO_AUTOMOUNT)));
+-
+-   if(r)
+-     return(r);
+-@@ -1017,7 +1017,7 @@
+-
+-   /* If AT_SYMLINK_NOFOLLOW is set in the fchownat call it should
+-      be when we stat it. */
+--  r=INT_NEXT_FSTATAT(dir_fd, path, &st, flags & AT_SYMLINK_NOFOLLOW);
+-+  r=INT_NEXT_FSTATAT(dir_fd, path, &st, flags & (AT_SYMLINK_NOFOLLOW | AT_EMPTY_PATH | AT_NO_AUTOMOUNT));
+-
+-   if(r)
+-     return(r);
+diff --git a/package/fakeroot/fakeroot.hash b/package/fakeroot/fakeroot.hash
+index d1d959df6f..5c50c83e13 100644
+--- a/package/fakeroot/fakeroot.hash
++++ b/package/fakeroot/fakeroot.hash
+@@ -1,6 +1,4 @@
+-# From http://snapshot.debian.org/package/fakeroot/1.20.2-1/
+-sha1	367040df07043edb630942b21939e493f3fad888	fakeroot_1.20.2.orig.tar.bz2
+-# Calculated based on the hash above
+-sha256	7c0a164d19db3efa9e802e0fc7cdfeff70ec6d26cdbdc4338c9c2823c5ea230c	fakeroot_1.20.2.orig.tar.bz2
++# From https://deb.debian.org/debian/pool/main/f/fakeroot/fakeroot_1.30.1-1.dsc
++sha256  32ebb1f421aca0db7141c32a8c104eb95d2b45c393058b9435fbf903dd2b6a75  fakeroot_1.30.1.orig.tar.gz
+ # License files, locally calculated
+-sha256	fc82ca8b6fdb18d4e3e85cfd8ab58d1bcd3f1b29abe782895abd91d64763f8e7	COPYING
++sha256  fc82ca8b6fdb18d4e3e85cfd8ab58d1bcd3f1b29abe782895abd91d64763f8e7  COPYING
+diff --git a/package/fakeroot/fakeroot.mk b/package/fakeroot/fakeroot.mk
+index 1be99071bf..20c75d6966 100644
+--- a/package/fakeroot/fakeroot.mk
++++ b/package/fakeroot/fakeroot.mk
+@@ -4,9 +4,9 @@
+ #
+ ################################################################################
+ 
+-FAKEROOT_VERSION = 1.20.2
+-FAKEROOT_SOURCE = fakeroot_$(FAKEROOT_VERSION).orig.tar.bz2
+-FAKEROOT_SITE = http://snapshot.debian.org/archive/debian/20141005T221953Z/pool/main/f/fakeroot
++FAKEROOT_VERSION = 1.30.1
++FAKEROOT_SOURCE = fakeroot_$(FAKEROOT_VERSION).orig.tar.gz
++FAKEROOT_SITE = https://snapshot.debian.org/archive/debian/20221120T030258Z/pool/main/f/fakeroot
+ 
+ HOST_FAKEROOT_DEPENDENCIES = host-acl
+ # Force capabilities detection off
+@@ -15,14 +15,7 @@ HOST_FAKEROOT_DEPENDENCIES = host-acl
+ HOST_FAKEROOT_CONF_ENV = \
+ 	ac_cv_header_sys_capability_h=no \
+ 	ac_cv_func_capset=no
+-# 0003-Select-TCP-when-lack-of-SYSV-IPC.patch touches configure.ac
+-HOST_FAKEROOT_AUTORECONF = YES
+ FAKEROOT_LICENSE = GPL-3.0+
+ FAKEROOT_LICENSE_FILES = COPYING
+ 
+-define HOST_FAKEROOT_BUILD_AUX
+-	mkdir -p $(@D)/build-aux
+-endef
+-HOST_FAKEROOT_POST_PATCH_HOOKS += HOST_FAKEROOT_BUILD_AUX
+-
+ $(eval $(host-autotools-package))
+diff --git a/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch b/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
+deleted file mode 100644
+index 5c5c11b990..0000000000
+--- a/package/m4/0001-fflush-adjust-to-glibc-2.28-libio.h-removal.patch
++++ /dev/null
+@@ -1,166 +0,0 @@
+-From 4af4a4a71827c0bc5e0ec67af23edef4f15cee8e Mon Sep 17 00:00:00 2001
+-From: Paul Eggert <eggert@cs.ucla.edu>
+-Date: Mon, 5 Mar 2018 10:56:29 -0800
+-Subject: [PATCH] fflush: adjust to glibc 2.28 libio.h removal
+-MIME-Version: 1.0
+-Content-Type: text/plain; charset=UTF-8
+-Content-Transfer-Encoding: 8bit
+-
+-Problem reported by Daniel P. Berrangé in:
+-https://lists.gnu.org/r/bug-gnulib/2018-03/msg00000.html
+-* lib/fbufmode.c (fbufmode):
+-* lib/fflush.c (clear_ungetc_buffer_preserving_position)
+-(disable_seek_optimization, rpl_fflush):
+-* lib/fpending.c (__fpending):
+-* lib/fpurge.c (fpurge):
+-* lib/freadable.c (freadable):
+-* lib/freadahead.c (freadahead):
+-* lib/freading.c (freading):
+-* lib/freadptr.c (freadptr):
+-* lib/freadseek.c (freadptrinc):
+-* lib/fseeko.c (fseeko):
+-* lib/fseterr.c (fseterr):
+-* lib/fwritable.c (fwritable):
+-* lib/fwriting.c (fwriting):
+-Check _IO_EOF_SEEN instead of _IO_ftrylockfile.
+-* lib/stdio-impl.h (_IO_IN_BACKUP) [_IO_EOF_SEEN]:
+-Define if not already defined.
+-
+-[yann.morin.1998@free.fr: partially backport from upstream gnulib]
+-Signed-off-by: "Yann E. MORIN" <yann.morin.1998@free.fr>
+-
+----
+- lib/fflush.c     |  6 +++---
+- lib/fpending.c   |  2 +-
+- lib/fpurge.c     |  2 +-
+- lib/freadahead.c |  2 +-
+- lib/freading.c   |  2 +-
+- lib/fseeko.c     |  4 ++--
+- lib/stdio-impl.h |  6 ++++++
+- 7 files changed, 15 insertions(+), 9 deletions(-)
+-
+-diff --git a/lib/fflush.c b/build-aux/gnulib/lib/fflush.c
+-index 983ade0ff..a6edfa105 100644
+---- a/lib/fflush.c
+-+++ b/lib/fflush.c
+-@@ -33,7 +33,7 @@
+- #undef fflush
+- 
+- 
+--#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+- 
+- /* Clear the stream's ungetc buffer, preserving the value of ftello (fp).  */
+- static void
+-@@ -72,7 +72,7 @@ clear_ungetc_buffer (FILE *fp)
+- 
+- #endif
+- 
+--#if ! (defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */)
+-+#if ! (defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */)
+- 
+- # if (defined __sferror || defined __DragonFly__ || defined __ANDROID__) && defined __SNPT
+- /* FreeBSD, NetBSD, OpenBSD, DragonFly, Mac OS X, Cygwin, Minix 3, Android */
+-@@ -148,7 +148,7 @@ rpl_fflush (FILE *stream)
+-   if (stream == NULL || ! freading (stream))
+-     return fflush (stream);
+- 
+--#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+- 
+-   clear_ungetc_buffer_preserving_position (stream);
+- 
+-diff --git a/lib/fpending.c b/build-aux/gnulib/lib/fpending.c
+-index c84e3a5b4..789f50e4e 100644
+---- a/lib/fpending.c
+-+++ b/lib/fpending.c
+-@@ -32,7 +32,7 @@ __fpending (FILE *fp)
+-   /* Most systems provide FILE as a struct and the necessary bitmask in
+-      <stdio.h>, because they need it for implementing getc() and putc() as
+-      fast macros.  */
+--#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   return fp->_IO_write_ptr - fp->_IO_write_base;
+- #elif defined __sferror || defined __DragonFly__ || defined __ANDROID__
+-   /* FreeBSD, NetBSD, OpenBSD, DragonFly, Mac OS X, Cygwin, Minix 3, Android */
+-diff --git a/lib/fpurge.c b/build-aux/gnulib/lib/fpurge.c
+-index b1d417c7a..3aedcc373 100644
+---- a/lib/fpurge.c
+-+++ b/lib/fpurge.c
+-@@ -62,7 +62,7 @@ fpurge (FILE *fp)
+-   /* Most systems provide FILE as a struct and the necessary bitmask in
+-      <stdio.h>, because they need it for implementing getc() and putc() as
+-      fast macros.  */
+--# if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+# if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   fp->_IO_read_end = fp->_IO_read_ptr;
+-   fp->_IO_write_ptr = fp->_IO_write_base;
+-   /* Avoid memory leak when there is an active ungetc buffer.  */
+-diff --git a/lib/freadahead.c b/build-aux/gnulib/lib/freadahead.c
+-index c2ecb5b28..23ec76ee5 100644
+---- a/lib/freadahead.c
+-+++ b/lib/freadahead.c
+-@@ -30,7 +30,7 @@ extern size_t __sreadahead (FILE *);
+- size_t
+- freadahead (FILE *fp)
+- {
+--#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   if (fp->_IO_write_ptr > fp->_IO_write_base)
+-     return 0;
+-   return (fp->_IO_read_end - fp->_IO_read_ptr)
+-diff --git a/lib/freading.c b/build-aux/gnulib/lib/freading.c
+-index 73c28acdd..c24d0c88a 100644
+---- a/lib/freading.c
+-+++ b/lib/freading.c
+-@@ -31,7 +31,7 @@ freading (FILE *fp)
+-   /* Most systems provide FILE as a struct and the necessary bitmask in
+-      <stdio.h>, because they need it for implementing getc() and putc() as
+-      fast macros.  */
+--# if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+# if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   return ((fp->_flags & _IO_NO_WRITES) != 0
+-           || ((fp->_flags & (_IO_NO_READS | _IO_CURRENTLY_PUTTING)) == 0
+-               && fp->_IO_read_base != NULL));
+-diff --git a/lib/fseeko.c b/build-aux/gnulib/lib/fseeko.c
+-index 0101ab55f..193f4e8ce 100644
+---- a/lib/fseeko.c
+-+++ b/lib/fseeko.c
+-@@ -47,7 +47,7 @@ fseeko (FILE *fp, off_t offset, int whence)
+- #endif
+- 
+-   /* These tests are based on fpurge.c.  */
+--#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   if (fp->_IO_read_end == fp->_IO_read_ptr
+-       && fp->_IO_write_ptr == fp->_IO_write_base
+-       && fp->_IO_save_base == NULL)
+-@@ -123,7 +123,7 @@ fseeko (FILE *fp, off_t offset, int whence)
+-           return -1;
+-         }
+- 
+--#if defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-       fp->_flags &= ~_IO_EOF_SEEN;
+-       fp->_offset = pos;
+- #elif defined __sferror || defined __DragonFly__ || defined __ANDROID__
+-diff --git a/lib/stdio-impl.h b/build-aux/gnulib/lib/stdio-impl.h
+-index 78d896e9f..05c5752a2 100644
+---- a/lib/stdio-impl.h
+-+++ b/lib/stdio-impl.h
+-@@ -18,6 +18,12 @@
+-    the same implementation of stdio extension API, except that some fields
+-    have different naming conventions, or their access requires some casts.  */
+- 
+-+/* Glibc 2.28 made _IO_IN_BACKUP private.  For now, work around this
+-+   problem by defining it ourselves.  FIXME: Do not rely on glibc
+-+   internals.  */
+-+#if !defined _IO_IN_BACKUP && defined _IO_EOF_SEEN
+-+# define _IO_IN_BACKUP 0x100
+-+#endif
+- 
+- /* BSD stdio derived implementations.  */
+- 
+--- 
+-2.14.1
+-
+diff --git a/package/m4/0002-fflush-be-more-paranoid-about-libio.h-change.patch b/package/m4/0002-fflush-be-more-paranoid-about-libio.h-change.patch
+deleted file mode 100644
+index a820ca8ca9..0000000000
+--- a/package/m4/0002-fflush-be-more-paranoid-about-libio.h-change.patch
++++ /dev/null
+@@ -1,151 +0,0 @@
+-From 74d9d6a293d7462dea8f83e7fc5ac792e956a0ad Mon Sep 17 00:00:00 2001
+-From: Paul Eggert <eggert@cs.ucla.edu>
+-Date: Thu, 8 Mar 2018 16:42:45 -0800
+-Subject: [PATCH 2/2] fflush: be more paranoid about libio.h change
+-
+-Suggested by Eli Zaretskii in:
+-https://lists.gnu.org/r/emacs-devel/2018-03/msg00270.html
+-* lib/fbufmode.c (fbufmode):
+-* lib/fflush.c (clear_ungetc_buffer_preserving_position)
+-(disable_seek_optimization, rpl_fflush):
+-* lib/fpending.c (__fpending):
+-* lib/fpurge.c (fpurge):
+-* lib/freadable.c (freadable):
+-* lib/freadahead.c (freadahead):
+-* lib/freading.c (freading):
+-* lib/freadptr.c (freadptr):
+-* lib/freadseek.c (freadptrinc):
+-* lib/fseeko.c (fseeko):
+-* lib/fseterr.c (fseterr):
+-* lib/fwritable.c (fwritable):
+-* lib/fwriting.c (fwriting):
+-Look at _IO_ftrylockfile as well as at _IO_EOF_SEEN.
+----
+- lib/fflush.c     |  9 ++++++---
+- lib/fpending.c   |  3 ++-
+- lib/fpurge.c     |  3 ++-
+- lib/freadahead.c |  3 ++-
+- lib/freading.c   |  3 ++-
+- lib/fseeko.c     |  6 ++++--
+- 6 files changed, 18 insertions(+), 9 deletions(-)
+-
+-[yann.morin.1998@free.fr: partially backport from upstream gnulib]
+-Signed-off-by: "Yann E. MORIN" <yann.morin.1998@free.fr>
+-
+-diff --git a/lib/fflush.c b/build-aux/gnulib/lib/fflush.c
+-index a6edfa105..a140b7ad9 100644
+---- a/lib/fflush.c
+-+++ b/lib/fflush.c
+-@@ -33,7 +33,8 @@
+- #undef fflush
+- 
+- 
+--#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+/* GNU libc, BeOS, Haiku, Linux libc5 */
+- 
+- /* Clear the stream's ungetc buffer, preserving the value of ftello (fp).  */
+- static void
+-@@ -72,7 +73,8 @@ clear_ungetc_buffer (FILE *fp)
+- 
+- #endif
+- 
+--#if ! (defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */)
+-+#if ! (defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1)
+-+/* GNU libc, BeOS, Haiku, Linux libc5 */
+- 
+- # if (defined __sferror || defined __DragonFly__ || defined __ANDROID__) && defined __SNPT
+- /* FreeBSD, NetBSD, OpenBSD, DragonFly, Mac OS X, Cygwin, Minix 3, Android */
+-@@ -148,7 +150,8 @@ rpl_fflush (FILE *stream)
+-   if (stream == NULL || ! freading (stream))
+-     return fflush (stream);
+- 
+--#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+  /* GNU libc, BeOS, Haiku, Linux libc5 */
+- 
+-   clear_ungetc_buffer_preserving_position (stream);
+- 
+-diff --git a/lib/fpending.c b/build-aux/gnulib/lib/fpending.c
+-index 789f50e4e..7bc235ded 100644
+---- a/lib/fpending.c
+-+++ b/lib/fpending.c
+-@@ -32,7 +32,8 @@ __fpending (FILE *fp)
+-   /* Most systems provide FILE as a struct and the necessary bitmask in
+-      <stdio.h>, because they need it for implementing getc() and putc() as
+-      fast macros.  */
+--#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+  /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   return fp->_IO_write_ptr - fp->_IO_write_base;
+- #elif defined __sferror || defined __DragonFly__ || defined __ANDROID__
+-   /* FreeBSD, NetBSD, OpenBSD, DragonFly, Mac OS X, Cygwin, Minix 3, Android */
+-diff --git a/lib/fpurge.c b/build-aux/gnulib/lib/fpurge.c
+-index 3aedcc373..554790b56 100644
+---- a/lib/fpurge.c
+-+++ b/lib/fpurge.c
+-@@ -62,7 +62,8 @@ fpurge (FILE *fp)
+-   /* Most systems provide FILE as a struct and the necessary bitmask in
+-      <stdio.h>, because they need it for implementing getc() and putc() as
+-      fast macros.  */
+--# if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+# if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+  /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   fp->_IO_read_end = fp->_IO_read_ptr;
+-   fp->_IO_write_ptr = fp->_IO_write_base;
+-   /* Avoid memory leak when there is an active ungetc buffer.  */
+-diff --git a/lib/freadahead.c b/build-aux/gnulib/lib/freadahead.c
+-index 23ec76ee5..ed3dd0ebd 100644
+---- a/lib/freadahead.c
+-+++ b/lib/freadahead.c
+-@@ -30,7 +30,8 @@ extern size_t __sreadahead (FILE *);
+- size_t
+- freadahead (FILE *fp)
+- {
+--#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+  /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   if (fp->_IO_write_ptr > fp->_IO_write_base)
+-     return 0;
+-   return (fp->_IO_read_end - fp->_IO_read_ptr)
+-diff --git a/lib/freading.c b/build-aux/gnulib/lib/freading.c
+-index c24d0c88a..790f92ca3 100644
+---- a/lib/freading.c
+-+++ b/lib/freading.c
+-@@ -31,7 +31,8 @@ freading (FILE *fp)
+-   /* Most systems provide FILE as a struct and the necessary bitmask in
+-      <stdio.h>, because they need it for implementing getc() and putc() as
+-      fast macros.  */
+--# if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+# if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+  /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   return ((fp->_flags & _IO_NO_WRITES) != 0
+-           || ((fp->_flags & (_IO_NO_READS | _IO_CURRENTLY_PUTTING)) == 0
+-               && fp->_IO_read_base != NULL));
+-diff --git a/lib/fseeko.c b/build-aux/gnulib/lib/fseeko.c
+-index 193f4e8ce..e5c5172e7 100644
+---- a/lib/fseeko.c
+-+++ b/lib/fseeko.c
+-@@ -47,7 +47,8 @@ fseeko (FILE *fp, off_t offset, int whence)
+- #endif
+- 
+-   /* These tests are based on fpurge.c.  */
+--#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+  /* GNU libc, BeOS, Haiku, Linux libc5 */
+-   if (fp->_IO_read_end == fp->_IO_read_ptr
+-       && fp->_IO_write_ptr == fp->_IO_write_base
+-       && fp->_IO_save_base == NULL)
+-@@ -123,7 +124,8 @@ fseeko (FILE *fp, off_t offset, int whence)
+-           return -1;
+-         }
+- 
+--#if defined _IO_EOF_SEEN || __GNU_LIBRARY__ == 1 /* GNU libc, BeOS, Haiku, Linux libc5 */
+-+#if defined _IO_EOF_SEEN || defined _IO_ftrylockfile || __GNU_LIBRARY__ == 1
+-+      /* GNU libc, BeOS, Haiku, Linux libc5 */
+-       fp->_flags &= ~_IO_EOF_SEEN;
+-       fp->_offset = pos;
+- #elif defined __sferror || defined __DragonFly__ || defined __ANDROID__
+--- 
+-2.14.1
+-
+diff --git a/package/m4/m4.hash b/package/m4/m4.hash
+index e665fc149f..a81f4fab9c 100644
+--- a/package/m4/m4.hash
++++ b/package/m4/m4.hash
+@@ -1,4 +1,4 @@
+ # Locally calculated after checking pgp signature
+-sha256	f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07	m4-1.4.18.tar.xz
++sha256  63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96  m4-1.4.19.tar.xz
+ # License files, locally calculated
+-sha256	8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903	COPYING
++sha256  3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  COPYING
+diff --git a/package/m4/m4.mk b/package/m4/m4.mk
+index 849e7f4a54..3a12092971 100644
+--- a/package/m4/m4.mk
++++ b/package/m4/m4.mk
+@@ -4,7 +4,7 @@
+ #
+ ################################################################################
+ 
+-M4_VERSION = 1.4.18
++M4_VERSION = 1.4.19
+ M4_SOURCE = m4-$(M4_VERSION).tar.xz
+ M4_SITE = $(BR2_GNU_MIRROR)/m4
+ M4_LICENSE = GPL-3.0+
+diff --git a/package/strace/0001-filter_seccomp-fix-no-MMU-build.patch b/package/strace/0001-filter_seccomp-fix-no-MMU-build.patch
+deleted file mode 100644
+index 27f6d1490b..0000000000
+--- a/package/strace/0001-filter_seccomp-fix-no-MMU-build.patch
++++ /dev/null
+@@ -1,46 +0,0 @@
+-From fb4fdb83be36ff5e71426d2bdea81d035cdbd0b8 Mon Sep 17 00:00:00 2001
+-From: Baruch Siach <baruch@tkos.co.il>
+-Date: Mon, 13 Jan 2020 14:54:15 +0200
+-Subject: [PATCH] filter_seccomp: fix no-MMU build
+-
+-Move the declaration of filter_generators out of HAVE_FORK ifdef to fix
+-build for no-MMU targets:
+-
+-filter_seccomp.c: In function ‘check_seccomp_filter_properties’:
+-filter_seccomp.c:608:42: error: ‘filter_generators’ undeclared (first use in this function); did you mean ‘linear_filter_generator’?
+-  for (unsigned int i = 0; i < ARRAY_SIZE(filter_generators); ++i) {
+-                                          ^~~~~~~~~~~~~~~~~
+-
+-Signed-off-by: Baruch Siach <baruch@tkos.co.il>
+----
+-Upstream status: https://lists.strace.io/pipermail/strace-devel/2020-January/thread.html
+-
+-
+- filter_seccomp.c | 4 ++--
+- 1 file changed, 2 insertions(+), 2 deletions(-)
+-
+-diff --git a/filter_seccomp.c b/filter_seccomp.c
+-index 91f6bc42bce3..da1abc713dfc 100644
+---- a/filter_seccomp.c
+-+++ b/filter_seccomp.c
+-@@ -68,8 +68,6 @@ static const struct audit_arch_t audit_arch_vec[SUPPORTED_PERSONALITIES] = {
+- # endif
+- };
+- 
+--# ifdef HAVE_FORK
+--
+- typedef unsigned short (*filter_generator_t)(struct sock_filter *,
+- 					     bool *overflow);
+- static unsigned short linear_filter_generator(struct sock_filter *,
+-@@ -92,6 +90,8 @@ static struct sock_fprog bpf_prog = {
+- 	.filter = NULL,
+- };
+- 
+-+# ifdef HAVE_FORK
+-+
+- static void ATTRIBUTE_NORETURN
+- check_seccomp_order_do_child(void)
+- {
+--- 
+-2.24.1
+-
+diff --git a/package/strace/strace.hash b/package/strace/strace.hash
+index dfc2143d65..555d074c5d 100644
+--- a/package/strace/strace.hash
++++ b/package/strace/strace.hash
+@@ -1,5 +1,5 @@
+ # Locally calculated after checking signature with RSA key 0xA8041FA839E16E36
+-# https://strace.io/files/5.4/strace-5.4.tar.xz.asc
+-sha256	f7d00514d51290b6db78ad7a9de709baf93caa5981498924cbc9a744cfd2a741	strace-5.4.tar.xz
+-sha256	739b2725197137a04ab48ee6b19da3fdf7e497249e0dedd9f51c11a570401ede	COPYING
+-sha256	7c379436436a562834aa7d2f5dcae1f80a25230fa74201046ca1fba4367d39aa	LGPL-2.1-or-later
++# https://strace.io/files/6.3/strace-6.3.tar.xz.asc
++sha256  e17878e301506c1cc301611118ad14efee7f8bcef63b27ace5d290acce7bb731  strace-6.3.tar.xz
++sha256  d92f973d08c8466993efff1e500453add0c038c20b4d2cbce3297938a296aea9  COPYING
++sha256  7c379436436a562834aa7d2f5dcae1f80a25230fa74201046ca1fba4367d39aa  LGPL-2.1-or-later
+diff --git a/package/strace/strace.mk b/package/strace/strace.mk
+index 3dd650f018..6514bfe354 100644
+--- a/package/strace/strace.mk
++++ b/package/strace/strace.mk
+@@ -4,11 +4,12 @@
+ #
+ ################################################################################
+ 
+-STRACE_VERSION = 5.4
++STRACE_VERSION = 6.3
+ STRACE_SOURCE = strace-$(STRACE_VERSION).tar.xz
+-STRACE_SITE = https://strace.io/files/$(STRACE_VERSION)
++STRACE_SITE = https://github.com/strace/strace/releases/download/v$(STRACE_VERSION)
+ STRACE_LICENSE = LGPL-2.1+
+ STRACE_LICENSE_FILES = COPYING LGPL-2.1-or-later
++STRACE_CPE_ID_VENDOR = strace_project
+ STRACE_CONF_OPTS = --enable-mpers=no
+ 
+ ifeq ($(BR2_PACKAGE_LIBUNWIND),y)

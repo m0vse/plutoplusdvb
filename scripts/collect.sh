@@ -6,4 +6,6 @@ cd ../linux
 git diff > ../../patches/linux.diff
 cd ../u-boot-xlnx
 git diff > ../../patches/u-boot-xlnx.diff
+cd ../buildroot
+git diff > ../../patches/buildroot.diff
 cd ../..
