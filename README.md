@@ -1,5 +1,9 @@
 # Pluto+DVB
-This is a fork of the firmware of Pluto+ combined with datvplutofrm from F5UII
+This is a fork of the firmware of Pluto+ combined with datvplutofrm from F5OEO/F5UII
+
+Original repositories are:
+https://github.com/plutoplus/plutoplus
+https://github.com/F5OEO/datvplutofrm
 
 This is a software-defined radio platform that supports DVB transmission, it also supports Gigabit Ethernet and Micro SD card. 
 
@@ -8,7 +12,7 @@ The design inherited from the well-known ADI ADALM-PLUTO with several improvemen
 ** PLEASE NOTE **
 This software is experimental and I accept no liability for any damage that may occur to your Plutoplus by using it
 
-The firmware/ folder contains pre-compiled binaries based on pluto firmware v0.33 and the latest datvplutofrm f5uii-master branch which I have successfully loaded on my Pluto+ (with minimal testing)
+The firmware/ folder contains pre-compiled binaries based on pluto firmware v0.33 and the latest datvplutofrm f5uii-master branch which I have successfully loaded on my Pluto+ (with minimal testing). It was built using Ubuntu 22.04.
 
 [TOC]
 
