@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index b06bc25..d9ef562 100644
+index 303b2f7..a1e7d1e 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -117,11 +117,12 @@ build/%.dtb: linux/arch/arm/boot/dts/%.dtb | build
